@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="fi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tunnista lippu - Oseania</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #101827, #243b55);
+            color: white;
+            text-align: center;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .game {
+            background: #1e293b;
+            padding: 30px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 550px;
+            box-shadow: 0 10px 40px #0006;
+        }
+
+        h1 {
+            color: #60a5fa;
+            margin-top: 0;
+        }
+
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 20px 0;
+            color: #cbd5e1;
+        }
+
+        #picture {
+            font-size: 130px;
+            background: #334155;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 20px 0;
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+		
+		#picture img {
+    max-width: 100%;
+    max-height: 250px;
+    object-fit: contain;
+    border-radius: 10px;
+}
+
+        input {
+            width: 85%;
+            padding: 13px;
+            border-radius: 10px;
+            border: 2px solid #475569;
+            background: #0f172a;
+            color: white;
+            font-size: 18px;
+            outline: none;
+            text-align: center;
+        }
+
+        input:focus {
+            border-color: #60a5fa;
+        }
+
+        button {
+            padding: 12px 20px;
+            margin: 8px 4px;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: bold;
+        }
+
+        .check {
+            background: #22c55e;
+            color: #052e16;
+        }
+
+        #feedback {
+            min-height: 28px;
+            font-size: 18px;
+            margin: 15px 0;
+        }
+
+        .restart {
+            background: #60a5fa;
+            color: #0f172a;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="game">
+    <h1>Tunnista lippu - Oseania</h1>
+    <p>Tunnista kuvassa oleva lippu!</p>
+
+    <div class="stats">
+        <span>Pisteet: <b id="score">0</b></span>
+        <span>Kysymys: <b id="number">1</b>/<b id="total">10</b></span>
+    </div>
+
+    <div id="picture">🍎</div>
+
+    <input
+        id="answer"
+        type="text"
+        placeholder="Mikän maan lippu on kuvassa?"
+        autocomplete="off"
+    >
+
+  <a href="https://nickname370.github.io/Tunnistalippu/tunnista.html">
+    <button style="position:absolute; top:20px; right:20px; padding:10px 14px; font-size:16px; cursor:pointer;">⬅️ Takaisin</button>
+  </a>
+
+    <br>
+
+    <button class="check" id="checkButton" onclick="checkAnswer()">
+        Tarkista
+    </button>
+
+    <p id="feedback"></p>
+
+    <button class="restart" id="restartButton"
+        onclick="startGame()" hidden>
+        🔄 Pelaa uudelleen
+    </button>
+</div>
+
+<script>
+    const questions = [
+{ image: "atollia.png", answers: ["atollia"]},
+{ image: "kengurulia.png", answers: ["kengurulia"]},
+{ image: "lammasliitto.png", answers: ["lammasliitto"]}
+    ];
+
+    let gameQuestions = [];
+    let current = 0;
+    let score = 0;
+    let answered = false;
+
+    function startGame() {
+        gameQuestions = [...questions]
+            .sort(() => Math.random() - 0.5)
+            .slice(0, 3);
+
+        current = 0;
+        score = 0;
+        answered = false;
+
+        document.getElementById("score").textContent = score;
+        document.getElementById("total").textContent = gameQuestions.length;
+        document.getElementById("restartButton").hidden = true;
+        document.getElementById("checkButton").hidden = false;
+        document.getElementById("answer").hidden = false;
+
+        showQuestion();
+    }
+
+    function showQuestion() {
+        if (current >= gameQuestions.length) {
+            endGame();
+            return;
+        }
+
+        const q = gameQuestions[current];
+
+        document.getElementById("number").textContent = current + 1;
+        document.getElementById("picture").innerHTML =
+    `<img src="${q.image}" alt="Tunnista lippu"
+    style="max-width:100%; max-height:250px; object-fit:contain;">`;
+        document.getElementById("answer").value = "";
+        document.getElementById("answer").disabled = false;
+        document.getElementById("feedback").textContent = "";
+
+        answered = false;
+
+
+        document.getElementById("answer").focus();
+    }
+
+    function checkAnswer() {
+        if (answered) return;
+
+        const input = document.getElementById("answer")
+            .value.trim().toLocaleLowerCase("fi-FI");
+
+        if (!input) {
+            document.getElementById("feedback").textContent =
+                "Kirjoita ensin vastaus!";
+            return;
+        }
+
+        const q = gameQuestions[current];
+        const correct = q.answers.some(
+            answer => answer.toLocaleLowerCase("fi-FI") === input
+        );
+
+        answered = true;
+
+        if (correct) {
+            score++;
+            document.getElementById("score").textContent = score;
+            document.getElementById("feedback").textContent =
+                "✅ Oikein! Hienosti tehty!";
+            document.getElementById("feedback").style.color = "#4ade80";
+        } else {
+            document.getElementById("feedback").textContent =
+                "❌ Väärin! Oikea vastaus: " + q.answers[0];
+            document.getElementById("feedback").style.color = "#f87171";
+        }
+
+        document.getElementById("answer").disabled = true;
+        document.getElementById("checkButton").disabled = true;
+
+        setTimeout(() => {
+            current++;
+            showQuestion();
+        }, 1500);
+    }
+
+    function endGame() {
+        document.getElementById("picture").textContent = "🏆";
+        document.getElementById("feedback").style.color = "#fbbf24";
+        document.getElementById("feedback").textContent =
+            "Peli päättyi! Sait " + score + " / " +
+            gameQuestions.length + " pistettä!";
+
+        document.getElementById("answer").hidden = true;
+        document.getElementById("checkButton").hidden = true;
+            score === 10 ? "Täydellinen tulos!" :
+            score >= 7 ? "Todella hyvä tulos!" :
+            "Yritä uudelleen ja paranna tulostasi!";
+
+        document.getElementById("restartButton").hidden = false;
+    }
+
+    document.getElementById("answer").addEventListener("keydown", event => {
+        if (event.key === "Enter") {
+            checkAnswer();
+        }
+    });
+
+    startGame();
+</script>
+
+</body>
+</html>
